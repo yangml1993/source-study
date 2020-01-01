@@ -52,11 +52,11 @@ for(int n : num){
 ```
 元素在queue数组中排列如下：
 
-![image](http://note.youdao.com/yws/res/6865/CC1336599DEB42A0B628105A103BE553)
+![image](https://github.com/yangml1993/source-study/blob/master/img/20200101-1.png)
 
 转化为树的表示形式如下图：
 
-![image](http://note.youdao.com/yws/res/6873/77FE21B0F25F4C218D72E344016A62DF)
+![image](https://github.com/yangml1993/source-study/blob/master/img/20200101-2.png)
 ### 三、基本操作
 #### 2、入堆操作
 
@@ -110,7 +110,7 @@ private void siftUpUsingComparator(int k, E x) {
 ```
 siftUp的过程是，从k=size + 1开始，比较k的父节点值和插入元素值，如果父节点值较大，则将父节点下移到k位置，接着令k=parent，再和上一个父节点比较，直到父节点值小于插入元素值时，此时的k值就是元素的插入位置。我们以之前构造的PriorityQueue为例，插入一个值为2的元素，整个过程如下图所示：
 
-![image](http://note.youdao.com/yws/res/6911/40BB4DD228FA436ABB3766C10A92E6D7)
+![image](https://github.com/yangml1993/source-study/blob/master/img/20200101-3.png)
 #### 3、出堆操作
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;出堆通过remove(E e)方法或poll(E e)方法,两者语义相同，只是Queue接口规定二者对插入失败时的处理不同，前者在出队失败时抛出异常，后则则会返回false。出堆是将树的根节点也就是数组的第一个元素从树中取出，由于根节点被取出，就必须要重新调整树的结构，以满足小顶堆的要求，这个过程叫siftDown，通过siftDown(int k, E x)来实现,以poll方法为例：
 
@@ -163,4 +163,4 @@ siftUp的过程是，从k=size + 1开始，比较k的父节点值和插入元素
 ```
 siftDown的过程是，将最末尾的叶子节点(lastNode)取出，放到根节点位置，接着和两个子节点较小的那一个(childNode)比较，如果lastNode较大，则交换两个节点的位置，childNode上移到父节点位置，lastNode移到child位置。接着，lastNode继续向下比较，直到lastNode值小于childNode，将lastNode插入到当前位置，完成调整。我们以之前构造的PriorityQueue为例，取出根节点1，整个调整过程如下图所示：
 
-![image](http://note.youdao.com/yws/res/6956/7C8B0A3061F04F769DC192BB9A65D4DB)
+![image](https://github.com/yangml1993/source-study/blob/master/img/20200101-4.png)
