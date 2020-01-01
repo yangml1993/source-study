@@ -126,11 +126,43 @@ rule batch定义在Analyzer类中，是Spark定义好的各种analyzed规则：
 ```
 如果校验全部通过，checkAnalysis将plan的Analyzed标志设为true，表示Analyzed正确完成。
 
-3)Optimizer对Unresolved LogicPlan优化得到optimized LogicPlan
+3)Optimizer对Unresolved LogicPlan优化得到Optimized LogicPlan
+Optimize的调用很简单，就是下面这一行代码：
+
+```scala
  sparkSession.sessionState.optimizer.execute(withCachedData)
+```
+Optimizer也继承了RuleExecutor，这里也是调用的父类的execute方法，根据定义在Optimizer的规则，调整执行计划，达到优化的目的。以ReorderJoin这个rule为例，它的作用是调整多表join时的join执行顺序，具体操作就是将一系列的带有join的子执行计划进行排序，尽可能地将带有条件过滤的子执行计划下推到执行树的最底层，这样能尽可能地减少join的数据量。
 
 4)SparkPlanner将逻辑执行计划转换成物理执行计划
+SparkPlanner继承QueryPlanner抽象类，QueryPlanner类定义了一个plan方法，这个方法通过使用strategies将LogicPlan转化为可执行的物理执行计划，而strategies由继承类来定义提供，这里的子类就是SparkPlanner，strategies定义如下:
 
+```scala
+ override def strategies: Seq[Strategy] =
+    experimentalMethods.extraStrategies ++
+      extraPlanningStrategies ++ (
+      PythonEvals ::
+      DataSourceV2Strategy ::
+      FileSourceStrategy ::
+      DataSourceStrategy(conf) ::
+      SpecialLimits ::
+      Aggregation ::
+      Window ::
+      JoinSelection ::
+      InMemoryScans ::
+      BasicOperators :: Nil)
+```
+plan方法执行后，会得到一到多个候选执行计划，目前Spark2.4中，是直接拿第一个候选执行计划作为最终执行计划：
+
+```scala
+lazy val sparkPlan: SparkPlan = {
+    SparkSession.setActiveSession(sparkSession)
+    // TODO: We use next(), i.e. take the first plan returned by the planner, here for now,
+    //       but we will implement to choose the best plan.
+    planner.plan(ReturnAnswer(optimizedPlan)).next()
+  }
+```
+得到物理执行计划后，还要再调用prepareForExecution方法
 
 
 
